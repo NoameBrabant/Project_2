@@ -89,9 +89,9 @@ st.markdown("""
     """, unsafe_allow_html=True)
 
 #Chargement du df_final et df_annexes:
-file_path = os.path.join(os.getcwd(), 'df_final.parquet')
-url_actor = os.path.join(os.getcwd(), 'df_actor.parquet')
-url_real = os.path.join(os.getcwd(), 'df_director.parquet')
+file_path = 'ignore\df_final.parquet'
+url_actor = 'ignore\df_actor.parquet'
+url_real = 'ignore\df_director.parquet'
 db = pd.read_parquet(file_path)
 db_acteur = pd.read_parquet(url_actor)
 db_real = pd.read_parquet(url_real)
@@ -101,10 +101,10 @@ db_real = pd.read_parquet(url_real)
 #Ajout du logo: 
 col1, col2 = st.columns([1, 2])
 with col1:
-    st.image("logo.png", width=600)
+    st.image('media\logo.png', width=600)
 
 with col2: 
-    st.image("logo_2.png", width=1275)
+    st.image('media\logo_2.png', width=1275)
 
 #Menu side :
 with st.sidebar:
@@ -131,7 +131,7 @@ if selection_menu == "Accueil":
     
     if choix != " ":
         #Ajout du jingle 
-        st.audio("jingle.mp3", format="audio/mpeg", autoplay=True)
+        st.audio('media\jingle.mp3', format="audio/mpeg", autoplay=True)
         
         
         col1, col2 = st.columns([1, 2])
@@ -161,7 +161,6 @@ if selection_menu == "Accueil":
         
         #Fonction pour obtenir les recommandations
         recommandations = recommend_similar_films(choix)
-        #st.subheader("Voici 5 films recommandés:")
         #Afficher les films recommandés: afficher les images + titres 
         st.markdown('<h2 class="sub-title">Films Recommandés</h2>', unsafe_allow_html=True)
         cols = st.columns(5)
@@ -182,7 +181,7 @@ if selection_menu == "Accueil":
                 """, unsafe_allow_html=True)
              
     else: 
-        st.info("Veuillez sélectionner un film.")
+        st.info("Veuillez sélectionner un film")
 
     # Affichage Top 10 films
     current_year = datetime.now().year
