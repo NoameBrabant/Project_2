@@ -2,11 +2,10 @@ import streamlit as st
 import pandas as pd
 from streamlit_option_menu import option_menu
 import os
+import base64
 from datetime import datetime
 from streamlit_image_select import image_select
-from ML import recommend_similar_films
-from ML import id_movie_actor
-from ML import id_movie_director
+from Library import recommend_similar_films, id_movie_actor, id_movie_director
 
 # Configuration de la page
 st.set_page_config(page_title="Cinema Planet", layout="wide")
@@ -41,7 +40,7 @@ st.markdown("""
         border-bottom: 2px solid #082830;}
 
         /* Images films*/
-        .movie-card {
+        .movie-card{
         background: #0B1012;
         border: 2px solid #082830;
         border-radius: 10px;
@@ -50,7 +49,8 @@ st.markdown("""
         transition: transform 0.3s ease;
         color: #D8E7EB;}
         .movie-card:hover {transform: translateY(-5px);
-        border-color: ##81BCCC;}
+        border-color: ##81BCCC;
+        cursor: pointer;}
         
         /* Overview */
         .synopsis-box {
@@ -71,13 +71,12 @@ st.markdown("""
         .stSelectbox {background-color: #082830; color: #D8E7EB;}
         /* Customize selectbox */
         div[data-baseweb="select"] > div {
-            background-color: #0B1012;
-            border-color: #082830;
-            color: #D8E7EB;}
+        background-color: #0B1012;
+        border-color: #082830;
+        color: #D8E7EB;}
             
         /* Text elements */
-        .stMarkdown, .stText {
-            color: #D8E7EB;}
+        .stMarkdown, .stText {color: #D8E7EB;}
         
         /* Info boxes */
         .stInfo {background-color: #082830; color: #D8E7EB;}
@@ -85,8 +84,40 @@ st.markdown("""
         /* Liens */
         a {color: #D8E7EB}
         a:hover {color: #D8E7EB;}
+            
+        /* Boutons */
+        .stButton > button {
+        width: 100%;                    
+        background-color: #0B1012;      
+        color: #81BCCC;                   
+        border-radius: 5px;             
+        border: none;                  
+        padding: 8px 16px;              
+        margin: 5px auto;               
+        font-size: 12px;               
+        transition: all 0.3s;}
+        /* Effet au survol */
+        .stButton > button:hover {
+        color: #81BCCC !important;
+        background-color: #161C1F;}
+        /* Effet au clic */                  
+       .stButton > button:active,
+       .stButton > button:focus {
+       transform: translateY(0px);     
+       background-color: #5A8B98;
+       color: #082830 !important;}      /* Force la couleur pendant le clic */
+       /* État visité */
+       .stButton > button:visited {
+       color: #81BCCC !important;} 
     </style>
     """, unsafe_allow_html=True)
+
+#Ajout du logo:  
+col1, col2 = st.columns([1, 2]) 
+with col1:
+    st.image('media\logo.png', width=500)  
+with col2:      
+    st.image('media\logo_2.png', width=1000) 
 
 #Chargement du df_final et df_annexes:
 file_path = 'ignore\df_final.parquet'
@@ -97,15 +128,6 @@ db_acteur = pd.read_parquet(url_actor)
 db_real = pd.read_parquet(url_real)
 
 #Page streamlit:
-
-#Ajout du logo: 
-col1, col2 = st.columns([1, 2])
-with col1:
-    st.image('media\logo.png', width=600)
-
-with col2: 
-    st.image('media\logo_2.png', width=1275)
-
 #Menu side :
 with st.sidebar:
     selection_menu = option_menu(
@@ -119,21 +141,36 @@ with st.sidebar:
             "nav-link": {"color": "#D8E7EB","--hover-color": "#082830"},
             "nav-link-selected": {"background-color": "#0B0D0E"},})
 
-if selection_menu == "Accueil": 
-    #Page d'accueil
-    st.markdown('<p class="gradient-text">Découvrez votre prochain film </p>', unsafe_allow_html=True) 
-    st.markdown('<h2 style="color: #D8E7EB;">Choisissez un film pour obtenir des recommandations personnalisées.</h2>', unsafe_allow_html=True)
-    #Sélection d'un film
-    st.markdown('<h2 class="sub-title">Les Films</h2>', unsafe_allow_html=True)
-    film = db['title'].unique()
-    film_with_blank = [" "] + list(film)
-    choix = st.selectbox(" ", film_with_blank)
-    
-    if choix != " ":
+#Initialisation de session_state
+if 'selectbox_key' not in st.session_state:
+    st.session_state.selectbox_key = "Entrez ou sélectionnez un film"
+
+#Page d'accueil
+if selection_menu == "Accueil":  
+    st.markdown('<p class="gradient-text">Découvrez votre prochain coup de coeur</p>', unsafe_allow_html=True) 
+    st.markdown('<h2 class="sub-title">Obtenez des recommandations de films personnalisées</h2>', unsafe_allow_html=True)  
+    #Sélection d'un film avec le menu déroulant
+    film = db['title'].sort_values(ascending=True).unique()
+    film_with_blank = ["Entrez ou sélectionnez un film"] + list(film)
+    #Paramètres pour rendre la selectbox modifiable 
+    if 'button_clicked' in st.session_state:
+        st.session_state.selectbox_key = st.session_state.button_clicked
+        del st.session_state.button_clicked
+    choix = st.selectbox(" ", film_with_blank, key='selectbox_key')
+    if choix != "Entrez ou sélectionnez un film":
+        
         #Ajout du jingle 
-        st.audio('media\jingle.mp3', format="audio/mpeg", autoplay=True)
+        audio_file = "media\jingle.mp3"
+        with open(audio_file, "rb") as file:
+            audio_data = file.read()
+        audio_base64 = base64.b64encode(audio_data).decode('utf-8') # Convertir les données audio en base64
+        st.markdown(f"""
+            <audio autoplay hidden>
+                <source src="data:audio/mpeg;base64,{audio_base64}" type="audio/mpeg">
+            </audio>
+            """, unsafe_allow_html=True)
         
-        
+        #Aligner l'image et l'overview:
         col1, col2 = st.columns([1, 2])
         with col1:
             # Afficher l'image du film:
@@ -170,18 +207,15 @@ if selection_menu == "Accueil":
             base_url = "https://image.tmdb.org/t/p/w500"
             poster_url = base_url + poster_path
             with cols[i]:
-                st.markdown(f"""
+                    st.markdown(f"""
                     <div class="movie-card">
-                        <img src="{poster_url}" 
-                        style="width: 100%; border-radius: 5px;">
-                        <p style="text-align: center; margin-top: 0.5rem; font-weight: bold;">
-                        {title_recommande}
-                        </p>
-                    </div>
-                """, unsafe_allow_html=True)
-             
-    else: 
-        st.info("Veuillez sélectionner un film")
+                    <img src="{poster_url}" 
+                    style="width: 100%; border-radius: 5px;">
+                    </div> """, unsafe_allow_html=True)
+                    #Rendre l'image cliquable pour retourner le film sélectionné en choix 
+                    if st.button(title_recommande, key=f"rec_{i}"):
+                        st.session_state.button_clicked = title_recommande
+                        st.rerun()
 
     # Affichage Top 10 films
     current_year = datetime.now().year
@@ -193,19 +227,19 @@ if selection_menu == "Accueil":
         col_index = i % 5
         with cols[col_index]:
             st.markdown(f"""
-                <div class="movie-card">
-                    <img src="https://image.tmdb.org/t/p/w500{row['poster_path']}" 
+            <div class="movie-card">
+                <img src="https://image.tmdb.org/t/p/w500{row['poster_path']}" 
                     style="width: 100%; border-radius: 5px;">
-                    <p style="text-align: center; margin-top: 0.5rem; font-weight: bold;">
-                    {row['title']}
-                    </p>
-                </div>
-            """, unsafe_allow_html=True)
-        
+            </div> """, unsafe_allow_html=True)
+            #Rendre l'image cliquable pour retourner le film sélectionné en choix
+            if st.button(row['title'], key=f"top_{i}"):
+                st.session_state.button_clicked = row['title']
+                st.rerun()
+
+#Page des Acteurs:
 elif selection_menu == "Acteurs":
-    #Page des Acteurs:
     st.title("Vous pouvez choisir un acteur: ")
-    acteur= db_acteur['name'].unique()
+    acteur= db_acteur['name'].sort_values(ascending=True).unique()
     acteur_with_blank = [" "] + list(acteur)
     choix_acteur = st.selectbox(" ", acteur_with_blank)
 
@@ -255,12 +289,12 @@ elif selection_menu == "Acteurs":
         st.markdown(f"<a href='{url_acteur}' target='_blank' style='color: #D8E7EB;'>En savoir plus sur {choix_acteur}</a>", unsafe_allow_html=True)
     
     else :
-        st.info("Veuillez sélectionner un acteur.")
-        
+        st.info("Veuillez sélectionner un acteur")
+
+#Page des Réalisateurs:        
 elif selection_menu == "Réalisateurs":
-    #Page des Réalisateurs:
     st.title("Vous pouvez choisir un réalisateur: ")
-    realisateur = db_real['name'].unique()
+    realisateur = db_real['name'].sort_values(ascending=True).unique()
     real_with_blank = [" "] + list(realisateur)
     choix_real = st.selectbox(" ", real_with_blank)
     
@@ -311,4 +345,4 @@ elif selection_menu == "Réalisateurs":
         st.markdown(f"<a href='{url_real}' target='_blank' style='color: #D8E7EB;'>En savoir plus sur {choix_real}</a>", unsafe_allow_html=True)
 
     else:
-        st.info("Veuillez sélectionner un réalisateur.")
+        st.info("Veuillez sélectionner un réalisateur")
