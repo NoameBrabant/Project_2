@@ -105,7 +105,7 @@ st.markdown("""
        .stButton > button:focus {
        transform: translateY(0px);     
        background-color: #5A8B98;
-       color: #082830 !important;}      /* Force la couleur pendant le clic */
+       color: #082830 !important;}
        /* État visité */
        .stButton > button:visited {
        color: #81BCCC !important;} 
