@@ -16,28 +16,21 @@ st.markdown("""
         /* Style général */
         .stApp {background-color: #0B0D0E;}
 
-        /* Titre principal */
-        .gradient-text {
-        background: linear-gradient(to right,#81BCCC 0%,#D8E7EB 50%,#082830 100%);
-        background-size: 200% auto;
-        color: transparent;
-        -webkit-background-clip: text;
-        background-clip: text;
-        -webkit-text-fill-color: transparent;
-        animation: shine 3s linear infinite;
-        font-size: 48px;
-        font-weight: bold;
+        /* Titres */
+        .title{
+        color: #D8E7EB;  
         text-align: center;
-        padding: 20px;}
-        @keyframes shine {to {background-position: 200% center;}}
-        
+        font-size: 2.8rem;
+        margin: 1.5rem 0;
+        padding-bottom: 0.5rem;}
+
         /* Sous-titres */
         .sub-title {
         color: #D8E7EB;
         font-size: 1.8rem;
         margin: 1.5rem 0;
         padding-bottom: 0.5rem;
-        border-bottom: 2px solid #082830;}
+        text-align: center;}
 
         /* Images films*/
         .movie-card{
@@ -68,12 +61,13 @@ st.markdown("""
         color: #D8E7EB;} 
         
         /* Selectbox */
-        .stSelectbox {background-color: #082830; color: #D8E7EB;}
+        .stSelectbox {color: #D8E7EB;}
         /* Customize selectbox */
         div[data-baseweb="select"] > div {
         background-color: #0B1012;
         border-color: #082830;
-        color: #D8E7EB;}
+        color: #D8E7EB;cd       
+        font-size: 20px;}
             
         /* Text elements */
         .stMarkdown, .stText {color: #D8E7EB;}
@@ -112,22 +106,41 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-#Ajout du logo:  
-col1, col2 = st.columns([1, 2]) 
+#Ajout du logo cinema planet:   
+st.logo("media/logo_2.png", size="large")  
+
+#Ajout du logo planet:  
+col1, col2, col3 = st.columns([1.30, 1, 1])
 with col1:
-    st.image('media\logo.png', width=500)  
-with col2:      
-    st.image('media\logo_2.png', width=1000) 
+    st.image('media/vide.png', width=100)  
+with col2:
+    st.image('media/logo.png', width=300)  
+with col3:
+    st.image('media/vide_2.png', width=100)
 
-#Chargement du df_final et df_annexes:
-file_path = 'ignore\df_final.parquet'
-url_actor = 'ignore\df_actor.parquet'
-url_real = 'ignore\df_director.parquet'
-db = pd.read_parquet(file_path)
-db_acteur = pd.read_parquet(url_actor)
-db_real = pd.read_parquet(url_real)
+# Optimized data loading
+@st.cache_data
+def load_data():
+    columns_needed = ['title', 'poster_path', 'overview', 'release_year', 'name_director', 
+                        'actor_name_1', 'actor_name_2', 'actor_name_3', 'actor_name_4', 'actor_name_5',
+                        'id_movie', 'release_date', 'vote_average']
+    return pd.read_parquet('dataframes/df_final.parquet', columns=columns_needed)
 
-#Page streamlit:
+@st.cache_data
+def load_actor_data():
+    columns_actor = ['name', 'profile_path','imdb_id']
+    return pd.read_parquet('dataframes/df_actor.parquet', columns=columns_actor)
+
+@st.cache_data
+def load_director_data():
+    columns_real = ['name', 'profile_path', 'imdb_id']
+    return pd.read_parquet('dataframes/df_director.parquet', columns=columns_real)
+
+# Load dataframes
+db = load_data()
+db_acteur = load_actor_data()
+db_real = load_director_data()
+
 #Menu side :
 with st.sidebar:
     selection_menu = option_menu(
@@ -139,16 +152,15 @@ with st.sidebar:
             "container": {"background-color": "#0B0D0E"},
             "icon": {"color": "#D8E7EB"},
             "nav-link": {"color": "#D8E7EB","--hover-color": "#082830"},
-            "nav-link-selected": {"background-color": "#0B0D0E"},})
+            "nav-link-selected": {"background-color": "#0B0D0E"}})
 
-#Initialisation de session_state
-if 'selectbox_key' not in st.session_state:
-    st.session_state.selectbox_key = "Entrez ou sélectionnez un film"
+# Initialize session state
+if 'selected_film' not in st.session_state:
+    st.session_state.selected_film = None
 
 #Page d'accueil
 if selection_menu == "Accueil":  
-    st.markdown('<p class="gradient-text">Découvrez votre prochain coup de coeur</p>', unsafe_allow_html=True) 
-    st.markdown('<h2 class="sub-title">Obtenez des recommandations de films personnalisées</h2>', unsafe_allow_html=True)  
+    st.markdown('<h1 class="title">Découvrez votre prochain coup de coeur</h1>', unsafe_allow_html=True)
     #Sélection d'un film avec le menu déroulant
     film = db['title'].sort_values(ascending=True).unique()
     film_with_blank = ["Entrez ou sélectionnez un film"] + list(film)
@@ -160,7 +172,7 @@ if selection_menu == "Accueil":
     if choix != "Entrez ou sélectionnez un film":
         
         #Ajout du jingle 
-        audio_file = "media\jingle.mp3"
+        audio_file = "media/jingle.mp3"
         with open(audio_file, "rb") as file:
             audio_data = file.read()
         audio_base64 = base64.b64encode(audio_data).decode('utf-8') # Convertir les données audio en base64
@@ -217,11 +229,11 @@ if selection_menu == "Accueil":
                         st.session_state.button_clicked = title_recommande
                         st.rerun()
 
-    # Affichage Top 10 films
-    current_year = datetime.now().year
-    films_2024 = db[(db['release_date'].dt.year == current_year)]
-    top_10 = films_2024.sort_values("vote_average", ascending=False).head(10)
-    st.markdown('<h2 class="sub-title">Top 10 Films 2024</h2>', unsafe_allow_html=True)
+    # Affichage Top 20 films 2024
+    #current_year = datetime.now().year
+    films_2024 = db[(db['release_date'].dt.year == 2024)]
+    top_10 = films_2024.sort_values("vote_average", ascending=False).head(20)
+    st.markdown('<h2 class="sub-title">Coup de projecteur 2024</h2>', unsafe_allow_html=True)
     cols = st.columns(5)
     for i, (index, row) in enumerate(top_10.iterrows()):
         col_index = i % 5
@@ -238,7 +250,7 @@ if selection_menu == "Accueil":
 
 #Page des Acteurs:
 elif selection_menu == "Acteurs":
-    st.title("Vous pouvez choisir un acteur: ")
+    st.markdown("<h2 class='sub-title'>Explorez l'univers d'un acteur</h2>", unsafe_allow_html=True)
     acteur= db_acteur['name'].sort_values(ascending=True).unique()
     acteur_with_blank = [" "] + list(acteur)
     choix_acteur = st.selectbox(" ", acteur_with_blank)
@@ -254,7 +266,7 @@ elif selection_menu == "Acteurs":
         
         with col2: 
             films_acteur = id_movie_actor(choix_acteur, db)
-            cols_per_row = 5
+            cols_per_row = 4
             for idx, film_id in enumerate(films_acteur):
                 if idx % cols_per_row == 0:
                     cols = st.columns(cols_per_row)
@@ -289,11 +301,11 @@ elif selection_menu == "Acteurs":
         st.markdown(f"<a href='{url_acteur}' target='_blank' style='color: #D8E7EB;'>En savoir plus sur {choix_acteur}</a>", unsafe_allow_html=True)
     
     else :
-        st.info("Veuillez sélectionner un acteur")
+        st.info("Veuillez entrer ou sélectionner un acteur")
 
 #Page des Réalisateurs:        
 elif selection_menu == "Réalisateurs":
-    st.title("Vous pouvez choisir un réalisateur: ")
+    st.markdown("<h2 class='sub-title'>Explorez l'univers d'un réalisateur</h2>", unsafe_allow_html=True)
     realisateur = db_real['name'].sort_values(ascending=True).unique()
     real_with_blank = [" "] + list(realisateur)
     choix_real = st.selectbox(" ", real_with_blank)
@@ -310,7 +322,7 @@ elif selection_menu == "Réalisateurs":
         with col2: 
             #Afficher les films du réalisteur:
             film_director = id_movie_director(choix_real, db)
-            cols_per_row = 5
+            cols_per_row = 4
             for idx, film_id in enumerate(film_director):
                 if idx % cols_per_row == 0:
                     cols = st.columns(cols_per_row)
@@ -345,4 +357,4 @@ elif selection_menu == "Réalisateurs":
         st.markdown(f"<a href='{url_real}' target='_blank' style='color: #D8E7EB;'>En savoir plus sur {choix_real}</a>", unsafe_allow_html=True)
 
     else:
-        st.info("Veuillez sélectionner un réalisateur")
+        st.info("Veuillez entrer ou sélectionner un réalisateur")

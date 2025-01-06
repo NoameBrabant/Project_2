@@ -11,22 +11,17 @@ from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils.validation import check_array
 import re
 
-df_movie = pd.read_parquet("ignore\df_movie.parquet")
+df_movie = pd.read_parquet("dataframes/df_movie.parquet")
 pd.set_option('display.max_columns', None)
 
-numeric_cols = ['popularity_movie', 'vote_average', 'vote_count',
-       'gender_director', 'popularity_director', 'birthday_director', 'actor_2_mean_movie', 'actor_3_mean_movie',
-       'actor_4_mean_movie', 'actor_5_mean_movie', 'actor_gender_1',
-       'actor_gender_2', 'actor_gender_3', 'actor_gender_4', 'actor_gender_5',
-       'actor_popularity_1', 'actor_popularity_2', 'actor_popularity_3',
-       'actor_popularity_4', 'actor_popularity_5']
+numeric_cols = ['popularity_movie', 'vote_average', 'vote_count','popularity_director']
 
-
-categorical_cols = ['original_language', 'name_director', 'place_of_birth_director']
+categorical_cols = ['original_language', 'name_director', 'Publique cible', 'Epoque',
+                    'Sujet principal', 'Type', 'actor_name_1', 'actor_name_2', 'actor_name_3', 'actor_name_4', 'actor_name_5']
 
 binarizer_cols = ['genre']
 
-date_cols = ['release_date', 'birthday_director', 'deathday_director']
+date_cols = ['release_date']
 
 # Custom transformer for MultiLabelBinarizer
 class MultiLabelBinarizerPipelineFriendly(BaseEstimator, TransformerMixin):
