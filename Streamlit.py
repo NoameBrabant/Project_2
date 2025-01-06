@@ -160,7 +160,7 @@ if selection_menu == "Accueil":
     if choix != "Entrez ou sélectionnez un film":
         
         #Ajout du jingle 
-        audio_file = "media\jingle.mp3"
+        audio_file = "media/jingle.mp3"
         with open(audio_file, "rb") as file:
             audio_data = file.read()
         audio_base64 = base64.b64encode(audio_data).decode('utf-8') # Convertir les données audio en base64
