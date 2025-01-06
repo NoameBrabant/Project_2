@@ -43,7 +43,7 @@ numeric_transformer = Pipeline(steps=[
 ])
 
 categorical_transformer = Pipeline(steps=[
-    ('onehot', OneHotEncoder(handle_unknown='dataframes'))
+    ('onehot', OneHotEncoder(handle_unknown='ignore'))
 ])
 
 date_transformer = Pipeline(steps=[
