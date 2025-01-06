@@ -121,9 +121,9 @@ with col3:
     st.image('media\\vide_2.png', width=100)
 
 #Chargement du df_final et df_annexes:
-file_path = 'ignore\df_final.parquet'
-url_actor = 'ignore\df_actor.parquet'
-url_real = 'ignore\df_director.parquet'
+file_path = 'dataframes\df_final.parquet'
+url_actor = 'dataframes\df_actor.parquet'
+url_real = 'dataframes\df_director.parquet'
 db = pd.read_parquet(file_path)
 db_acteur = pd.read_parquet(url_actor)
 db_real = pd.read_parquet(url_real)
