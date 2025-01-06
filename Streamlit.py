@@ -106,12 +106,10 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-#Ajout du logo:   
+#Ajout du logo cinema planet:   
 st.logo("media/logo_2.png", size="large")  
-#Logo planet
-#st.image('media\logo.png', width=150) 
 
-#Ajout du logo:  
+#Ajout du logo planet:  
 col1, col2, col3 = st.columns([1.30, 1, 1])
 with col1:
     st.image('media/vide.png', width=100)  
@@ -120,15 +118,24 @@ with col2:
 with col3:
     st.image('media/vide_2.png', width=100)
 
-#Chargement du df_final et df_annexes:
-file_path = 'dataframes/df_final.parquet'
-url_actor = 'dataframes/df_actor.parquet'
-url_real = 'dataframes/df_director.parquet'
-db = pd.read_parquet(file_path)
-db_acteur = pd.read_parquet(url_actor)
-db_real = pd.read_parquet(url_real)
+# Optimized data loading
+@st.cache_data
+def load_data():
+    return pd.read_parquet('dataframes/df_final.parquet')
 
-#Page streamlit:
+@st.cache_data
+def load_actor_data():
+    return pd.read_parquet('dataframes/df_actor.parquet')
+
+@st.cache_data
+def load_director_data():
+    return pd.read_parquet('dataframes/df_director.parquet')
+
+# Load dataframes
+db = load_data()
+db_acteur = load_actor_data()
+db_real = load_director_data()
+
 #Menu side :
 with st.sidebar:
     selection_menu = option_menu(
@@ -142,9 +149,9 @@ with st.sidebar:
             "nav-link": {"color": "#D8E7EB","--hover-color": "#082830"},
             "nav-link-selected": {"background-color": "#0B0D0E"}})
 
-#Initialisation de session_state
-if 'selectbox_key' not in st.session_state:
-    st.session_state.selectbox_key = "Entrez ou sélectionnez un film"
+# Initialize session state
+if 'selected_film' not in st.session_state:
+    st.session_state.selected_film = None
 
 #Page d'accueil
 if selection_menu == "Accueil":  
@@ -254,7 +261,7 @@ elif selection_menu == "Acteurs":
         
         with col2: 
             films_acteur = id_movie_actor(choix_acteur, db)
-            cols_per_row = 5
+            cols_per_row = 4
             for idx, film_id in enumerate(films_acteur):
                 if idx % cols_per_row == 0:
                     cols = st.columns(cols_per_row)
@@ -310,7 +317,7 @@ elif selection_menu == "Réalisateurs":
         with col2: 
             #Afficher les films du réalisteur:
             film_director = id_movie_director(choix_real, db)
-            cols_per_row = 5
+            cols_per_row = 4
             for idx, film_id in enumerate(film_director):
                 if idx % cols_per_row == 0:
                     cols = st.columns(cols_per_row)
