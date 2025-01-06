@@ -11,7 +11,7 @@ from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils.validation import check_array
 import re
 
-df_movie = pd.read_parquet("ignore\df_movie.parquet")
+df_movie = pd.read_parquet("dataframes\df_movie.parquet")
 pd.set_option('display.max_columns', None)
 
 numeric_cols = ['popularity_movie', 'vote_average', 'vote_count','popularity_director']
@@ -43,7 +43,7 @@ numeric_transformer = Pipeline(steps=[
 ])
 
 categorical_transformer = Pipeline(steps=[
-    ('onehot', OneHotEncoder(handle_unknown='ignore'))
+    ('onehot', OneHotEncoder(handle_unknown='dataframes'))
 ])
 
 date_transformer = Pipeline(steps=[
