@@ -121,15 +121,20 @@ with col3:
 # Optimized data loading
 @st.cache_data
 def load_data():
-    return pd.read_parquet('dataframes/df_final.parquet')
+    columns_needed = ['title', 'poster_path', 'overview', 'release_year', 'name_director', 
+                        'actor_name_1', 'actor_name_2', 'actor_name_3', 'actor_name_4', 'actor_name_5',
+                        'id_movie', 'release_date', 'vote_average']
+    return pd.read_parquet('dataframes/df_final.parquet', columns=columns_needed)
 
 @st.cache_data
 def load_actor_data():
-    return pd.read_parquet('dataframes/df_actor.parquet')
+    columns_actor = ['name', 'profile_path']
+    return pd.read_parquet('dataframes/df_actor.parquet', columns=columns_actor)
 
 @st.cache_data
 def load_director_data():
-    return pd.read_parquet('dataframes/df_director.parquet')
+    columns_real = ['name', 'profile_path']
+    return pd.read_parquet('dataframes/df_director.parquet', columns=columns_real)
 
 # Load dataframes
 db = load_data()
