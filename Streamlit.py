@@ -128,12 +128,12 @@ def load_data():
 
 @st.cache_data
 def load_actor_data():
-    columns_actor = ['name', 'profile_path']
+    columns_actor = ['name', 'profile_path','imdb_id']
     return pd.read_parquet('dataframes/df_actor.parquet', columns=columns_actor)
 
 @st.cache_data
 def load_director_data():
-    columns_real = ['name', 'profile_path']
+    columns_real = ['name', 'profile_path', 'imdb_id']
     return pd.read_parquet('dataframes/df_director.parquet', columns=columns_real)
 
 # Load dataframes
