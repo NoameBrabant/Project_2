@@ -107,23 +107,23 @@ st.markdown("""
     """, unsafe_allow_html=True)
 
 #Ajout du logo:   
-st.logo('media\logo_2.png', size="large")  
+st.logo("media/logo_2.png", size="large")  
 #Logo planet
 #st.image('media\logo.png', width=150) 
 
 #Ajout du logo:  
 col1, col2, col3 = st.columns([1.30, 1, 1])
 with col1:
-    st.image('media\\vide.png', width=100)  
+    st.image('media/vide.png', width=100)  
 with col2:
-    st.image('media\logo.png', width=300)  
+    st.image('media/logo.png', width=300)  
 with col3:
-    st.image('media\\vide_2.png', width=100)
+    st.image('media/vide_2.png', width=100)
 
 #Chargement du df_final et df_annexes:
-file_path = 'dataframes\df_final.parquet'
-url_actor = 'dataframes\df_actor.parquet'
-url_real = 'dataframes\df_director.parquet'
+file_path = 'dataframes/df_final.parquet'
+url_actor = 'dataframes/df_actor.parquet'
+url_real = 'dataframes/df_director.parquet'
 db = pd.read_parquet(file_path)
 db_acteur = pd.read_parquet(url_actor)
 db_real = pd.read_parquet(url_real)
